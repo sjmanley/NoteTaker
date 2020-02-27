@@ -1,22 +1,26 @@
-var express = require ("express");
+var express = require("express")
+var path = require("path")
 
-var app = express ();
+//sets up express app
+var app = express();
 
-var PORT = process.env.port || 3000;
+app.use(express.static('assets'));
+var PORT = process.env.PORT || 3000;
 
-app.use(expree.urlencoded({extended: true}));
-app.use (express.json());
+//sets up express app to handle data parsing
+app.use(express.urlencoded({extended: true}));
+app.use(express.json());
 
-require ("./api")(app);
-require ("./html")(app);
-
-app.listen(PORT, function() {
-    console.log ("app listening on port: " + PORT);
+//Routes
+app.get("/", function(req, res) {
+    res.sendFile(path.join(__dirname, "./index.html"));
+});
+app.get("/notes", function(req, res) {
+    res.sendFile(path.join(__dirname, "./notes.html"));
 });
 
 
-
-
-
-
-
+//start server to listen
+app.listen(PORT, function() {
+    console.log("App listening on PORT " + PORT);
+});
