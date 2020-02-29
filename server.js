@@ -1,32 +1,32 @@
-var express = require("express")
-var path = require("path")
+const express = require("express")
+const path = require("path")
+const fs = require("fs");
 
 //sets up express app
-var app = express();
+const app = express();
+const dbFile = "db/db.json";
 
-app.use(express.static('assets'));
-var PORT = process.env.PORT || 3000;
+app.use(express.static("assets"));
+const PORT = process.env.PORT || 3000;
 
-//sets up express app to handle data parsing
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
 //Routes
 app.get("/", function(req, res) {
-    res.sendFile(path.join(__dirname, "./index.html"));
+    res.sendFile(path.join(__dirname, "index.html"));
 });
-app.get("/notes", function(req, res) {
-    res.sendFile(path.join(__dirname, "./notes.html"));
+app.get("notes", function(req, res) {
+    res.sendFile(path.join(__dirname, "notes.html"));
 });
-
-app.post('/api/notes', (req, res) => {
-    // Get the Data
+app.get("api/notes", (req, res) => {
+    // Return the DB file
+    res.sendFile(path.join(__dirname, "db/db.json"));
+  });
+app.post("api/notes", (req, res) => {
     const data = req.body;
-    // Create Unique ID
     const id = Date.now();
-    // Read the DB file
-    const db = fs.readFileSync(path.join(__dirname, '/db/db.json'), 'utf8');
-    // Add the Note object
+    const db = fs.readFileSync(path.join(__dirname, "db/db.json"), "utf8");
     const note = {
       id: id,
       title: data.title,
@@ -34,19 +34,16 @@ app.post('/api/notes', (req, res) => {
     };
     const dbObj = JSON.parse(db);
     dbObj.push(note);
-    // Save the DB file
-    fs.writeFileSync(path.join(__dirname, '/db/db.json'), JSON.stringify(dbObj), 'utf8');
-    // Return the DB file
-    res.sendFile(path.join(__dirname, '/db/db.json'));
+    fs.writeFileSync(path.join(__dirname, "db/db.json"), JSON.stringify(dbObj), "utf8");
+    res.sendFile(path.join(__dirname, "db/db.json"));
   });
   
-  app.delete('/api/notes/:id', (req, res) => {
-    // Get the ID
+  app.delete("api/notes/:id", (req, res) => {
+
     const id = req.params.id;
-    // const id = req.url.split('/')[3];
-    // Read the DB file
-    const db = fs.readFileSync(path.join(__dirname, '/db/db.json'), 'utf8');
-    // Remove the Object with ID
+
+    const db = fs.readFileSync(path.join(__dirname, "db/db.json"), "utf8");
+
     const dbObj = JSON.parse(db);
     for (let x = 0; x < dbObj.length; x++) {
       if (dbObj[x].id.toString() === id) {
@@ -54,14 +51,26 @@ app.post('/api/notes', (req, res) => {
         break;
       }
     }
-    // Save the DB file
-    fs.writeFileSync(path.join(__dirname, '/db/db.json'), JSON.stringify(dbObj), 'utf8');
+
+    fs.writeFileSync(path.join(__dirname, "db/db.json"), JSON.stringify(dbObj), "utf8");
     // Return the DB file
-    res.sendFile(path.join(__dirname, '/db/db.json'));
+    res.sendFile(path.join(__dirname, "db/db.json"));
   });
 
-
-//start server to listen
 app.listen(PORT, function() {
     console.log("App listening on PORT " + PORT);
 });
+
+function getNewId() {
+    let newId = {};
+    console.log(dbNotes);
+    if (typeof dbNotes.id === "undefined") {
+      newId.id = 0;
+    }
+    else {
+      console.log (dbNotes[0].id);
+      newId.id = dbNotes[dbNotes.length -1].id + 1; //gets last ID 
+    }
+    debug && console.log(`lastID of getNewId: ${newId}`);
+    return newId;
+  }
